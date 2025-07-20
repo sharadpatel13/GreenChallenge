@@ -17,21 +17,21 @@
     <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
 
-        <div class="mb-3">
-            {{ form.challenge.label_tag }}
-            {{ form.challenge }}
-            {% if form.challenge.help_text %}
-                <small class="form-text text-muted">{{ form.challenge.help_text }}</small>
-            {% endif %}
-        </div>
+<div class="mb-3">
+    {{ form.challenge_title.label_tag }}
+    {{ form.challenge_title }}
+    {% if form.challenge_title.help_text %}
+        <small class="form-text text-muted">{{ form.challenge_title.help_text }}</small>
+    {% endif %}
+</div>
 
-        <div class="mb-3">
-            {{ form.proof.label_tag }}
-            {{ form.proof }}
-            {% if form.proof.help_text %}
-                <small class="form-text text-muted">{{ form.proof.help_text }}</small>
-            {% endif %}
-        </div>
+<div class="mb-3">
+    {{ form.file_upload.label_tag }}
+    {{ form.file_upload }}
+    {% if form.file_upload.help_text %}
+        <small class="form-text text-muted">{{ form.file_upload.help_text }}</small>
+    {% endif %}
+</div>
 
         <button type="submit" class="btn btn-success">✅ Submit</button>
     </form>
