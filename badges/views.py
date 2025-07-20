@@ -1,4 +1,4 @@
-from django.views.generic import CreateView
+from django.views.generic import CreateView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
@@ -10,7 +10,7 @@ class SubmitProofView(LoginRequiredMixin, CreateView):
     model = UserProofUpload
     form_class = SubmitProofForm
     template_name = 'submit_proof.html'
-    success_url = reverse_lazy('my-challenges')  # Replace with your dashboard URL
+    success_url = reverse_lazy('my-challenges')
 
     def form_valid(self, form):
         form.instance.user = self.request.user
@@ -28,13 +28,11 @@ class SubmitProofView(LoginRequiredMixin, CreateView):
             defaults={'description': 'Awarded for completing 3 approved challenges!'}
         )
 
-        # Assign badge if qualified
         if approved_count >= 3 and not UserProofUpload.objects.filter(user=user, badge_awarded=badge).exists():
             form.instance.badge_awarded = badge
             form.instance.save()
             messages.success(self.request, f"🎉 Congrats! You've earned the '{badge.name}' badge!")
 
-            # Email notification (optional)
             try:
                 send_mail(
                     subject='🎉 Badge Unlocked!',
@@ -48,3 +46,5 @@ class SubmitProofView(LoginRequiredMixin, CreateView):
 
         return response
 
+class MyChallengesView(LoginRequiredMixin, TemplateView):
+    template_name = 'my_challenges.html'
