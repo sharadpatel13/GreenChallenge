@@ -1,10 +1,15 @@
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import CreateView, TemplateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
-from .models import UserProofUpload, Badge
-from .forms import SubmitProofForm
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from collections import defaultdict
+
+from .models import UserProofUpload, Badge, LeaderboardEntry
+from .forms import SubmitProofForm, BadgeAssignForm
+
 
 class SubmitProofView(LoginRequiredMixin, CreateView):
     model = UserProofUpload
@@ -46,5 +51,97 @@ class SubmitProofView(LoginRequiredMixin, CreateView):
 
         return response
 
+
 class MyChallengesView(LoginRequiredMixin, TemplateView):
     template_name = 'my_challenges.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        approved_proofs = UserProofUpload.objects.filter(user=user, approved=True)
+        pending_proofs = UserProofUpload.objects.filter(user=user, approved=False, rejected=False)
+        rejected_proofs = UserProofUpload.objects.filter(user=user, rejected=True)
+
+        # Group approved by challenge title
+        grouped_approved = {}
+        for proof in approved_proofs:
+            grouped_approved.setdefault(proof.challenge_title, []).append(proof)
+
+        # Group pending by challenge title
+        grouped_pending = {}
+        for proof in pending_proofs:
+            grouped_pending.setdefault(proof.challenge_title, []).append(proof)
+
+        # Group rejected by challenge title
+        grouped_rejected = {}
+        for proof in rejected_proofs:
+            grouped_rejected.setdefault(proof.challenge_title, []).append(proof)
+
+        # Total submissions = all submissions by user
+        total_submissions = UserProofUpload.objects.filter(user=user).count()
+
+        # Total badges = count of approved proofs with badges
+        total_badges = approved_proofs.exclude(badge_awarded=None).count()
+
+        # Total distinct challenges user submitted proofs for
+        total_challenges = UserProofUpload.objects.filter(user=user).values('challenge_title').distinct().count()
+
+        context.update({
+            'grouped_proofs': grouped_approved,
+            'pending_proofs_grouped': grouped_pending,
+            'rejected_proofs_grouped': grouped_rejected,
+            'total_badges': total_badges,
+            'total_submissions': total_submissions,
+            'total_challenges': total_challenges,
+        })
+
+        return context
+
+
+class LeaderboardView(LoginRequiredMixin, ListView):
+    model = LeaderboardEntry
+    template_name = 'leaderboard.html'
+    context_object_name = 'leaderboard'
+    ordering = ['-points']
+
+
+@login_required
+def assign_badge_view(request, proof_id):
+    proof = get_object_or_404(UserProofUpload, id=proof_id)
+
+    if request.method == 'POST':
+        form = BadgeAssignForm(request.POST, instance=proof)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Badge assigned to proof: {proof.challenge_title}')
+            return redirect('my-challenges')  # Redirect to My Challenges dashboard
+    else:
+        form = BadgeAssignForm(instance=proof)
+
+    return render(request, 'assign_badge.html', {'form': form, 'proof': proof})
+
+
+@login_required
+def review_proofs(request):
+    if not request.user.is_superuser:
+        return redirect('my-challenges')
+
+    pending_proofs = UserProofUpload.objects.filter(approved=False, rejected=False)
+
+    if request.method == 'POST':
+        proof_id = request.POST.get('proof_id')
+        action = request.POST.get('action')
+        proof = get_object_or_404(UserProofUpload, id=proof_id)
+
+        if action == 'approve':
+            proof.approved = True
+            proof.rejected = False
+        elif action == 'reject':
+            proof.approved = False
+            proof.rejected = True
+        proof.save()
+        messages.success(request, f"✅ Submission for '{proof.challenge_title}' has been {action}d.")
+        return redirect('review-proofs')
+
+    return render(request, 'review_proofs.html', {'proofs': pending_proofs})

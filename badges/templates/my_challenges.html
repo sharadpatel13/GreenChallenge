@@ -1,10 +1,154 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
-  <h2 class="mb-4">My Challenges</h2>
+<div class="container mt-5">
+    <h2 class="mb-4">🌿 My Challenges</h2>
+    <p>Welcome, {{ user.username }}! 🎉</p>
 
-  <div class="alert alert-success">
-    <p>Welcome, <strong>{{ user.username }}</strong>! 🎉</p>
-    <p>This is your challenge dashboard. Approved submissions and badges will be shown here.</p>
-  </div>
+    <!-- Summary Cards -->
+    <div class="row text-center mb-4">
+        <div class="col-md-4">
+            <div class="card bg-light shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">✅ Total Submissions</h5>
+                    <p class="display-6">{{ total_submissions }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-light shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">🏆 Challenges Completed</h5>
+                    <p class="display-6">{{ total_challenges }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-light shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">🎖️ Badges Earned</h5>
+                    <p class="display-6">{{ total_badges }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approved Submissions -->
+    {% if grouped_proofs %}
+        <h3 class="mt-4">📄 Approved Submissions</h3>
+        {% for challenge_title, proofs in grouped_proofs.items %}
+            <div class="card my-3 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <strong>{{ challenge_title }}</strong>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for proof in proofs %}
+                            <li class="list-group-item">
+                                📅 Uploaded: {{ proof.date_uploaded|date:"M d, Y" }}<br>
+                                🏅 Badge:
+                                {% if proof.badge_awarded %}
+                                    <strong>{{ proof.badge_awarded.name }}</strong>
+                                {% else %}
+                                    None
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+    <p class="text-muted"><strong>You don’t have any approved submissions yet.</strong></p>
+    {% endif %}
+
+    <!-- Pending Submissions -->
+    {% if pending_proofs_grouped %}
+        <h3 class="mt-5">⌛ Pending Submissions</h3>
+        {% for challenge_title, proofs in pending_proofs_grouped.items %}
+            <div class="card my-3 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <strong>{{ challenge_title }}</strong>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for proof in proofs %}
+                            <li class="list-group-item">
+                                📅 Uploaded: {{ proof.date_uploaded|date:"M d, Y" }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+    <p class="text-muted mt-3"><strong>No pending submissions.</strong></p>
+    {% endif %}
+
+    <!-- Rejected Submissions -->
+    {% if rejected_proofs_grouped %}
+        <h3 class="mt-5">❌ Rejected Submissions</h3>
+        {% for challenge_title, proofs in rejected_proofs_grouped.items %}
+            <div class="card my-3 shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <strong>{{ challenge_title }}</strong>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for proof in proofs %}
+                            <li class="list-group-item">
+                                📅 Uploaded: {{ proof.date_uploaded|date:"M d, Y" }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+    <p class="text-muted mt-3"><strong>No rejected submissions.</strong></p>
+    {% endif %}
+
+    <!-- Export Button -->
+    <div class="mt-4 text-end">
+        <a href="#" class="btn btn-outline-primary" onclick="downloadCSV()">⬇️ Export History</a>
+    </div>
+</div>
+
+<!-- CSV Export Script -->
+<script>
+function downloadCSV() {
+    const rows = [['Challenge', 'Uploaded Date', 'Badge', 'Status']];
+    const cards = document.querySelectorAll('.card.my-3.shadow-sm');
+
+    cards.forEach(card => {
+        const challenge = card.querySelector('.card-header').innerText.trim();
+        const items = card.querySelectorAll('.list-group-item');
+        const status = card.querySelector('.card-header').classList.contains('bg-success') ? 'Approved' :
+                       card.querySelector('.card-header').classList.contains('bg-warning') ? 'Pending' :
+                       card.querySelector('.card-header').classList.contains('bg-danger') ? 'Rejected' : '';
+
+        items.forEach(item => {
+            const uploadedLine = item.innerText.split('\n')[0] || '';
+            const uploaded = uploadedLine.replace('📅 Uploaded: ', '').trim();
+
+            let badge = 'None';
+            if(status === 'Approved') {
+                const badgeLine = item.innerText.split('\n')[1] || '';
+                badge = badgeLine.replace('🏅 Badge:', '').trim();
+            }
+
+            rows.push([challenge, uploaded, badge, status]);
+        });
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "my_challenges_history.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
 {% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>📥 Pending Proof Submissions</h2>
+    {% if proofs %}
+        {% for proof in proofs %}
+            <div class="card my-3">
+                <div class="card-header">{{ proof.challenge_title }} by {{ proof.user.username }}</div>
+                <div class="card-body">
+                    <p>Uploaded on: {{ proof.date_uploaded }}</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="proof_id" value="{{ proof.id }}">
+                        <button name="action" value="approve" class="btn btn-success">✅ Approve</button>
+                        <button name="action" value="reject" class="btn btn-danger">❌ Reject</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p><strong>No pending proofs to review.</strong></p>
+    {% endif %}
+</div>
+{% endblock %}

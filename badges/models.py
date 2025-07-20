@@ -16,6 +16,7 @@ class UserProofUpload(models.Model):
     file_upload = models.FileField(upload_to='proof_uploads/')
     date_uploaded = models.DateTimeField(default=timezone.now)
     approved = models.BooleanField(default=False)
+    rejected = models.BooleanField(default=False)
     badge_awarded = models.ForeignKey(Badge, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
