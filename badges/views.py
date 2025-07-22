@@ -1,4 +1,4 @@
-from django.views.generic import CreateView, TemplateView, ListView
+from django.views.generic import CreateView, TemplateView, ListView, DetailView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
@@ -6,9 +6,13 @@ from django.core.mail import send_mail
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from collections import defaultdict
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+from django.utils import timezone
 
-from .models import UserProofUpload, Badge, LeaderboardEntry
-from .forms import SubmitProofForm, BadgeAssignForm
+
+from .models import UserProofUpload, Badge, LeaderboardEntry, Challenge, UserProgress
+from .forms import SubmitProofForm, BadgeAssignForm, ChallengeForm, JoinChallengeForm
 
 
 class SubmitProofView(LoginRequiredMixin, CreateView):
@@ -98,6 +102,55 @@ class MyChallengesView(LoginRequiredMixin, TemplateView):
 
         return context
 
+#Add this
+class ChallengeCreateView(LoginRequiredMixin, CreateView):
+    model = Challenge
+    form_class = ChallengeForm
+    template_name = 'challenge_form.html'
+    success_url = reverse_lazy('challenge_list')
+
+#Add this
+class ChallengeListView(ListView):
+    model = Challenge
+    template_name = 'challenge_list.html'  # Corrected template name
+    context_object_name = 'challenges'
+    ordering = ['-created_at']  # Sort challenges by creation date (newest first)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = JoinChallengeForm() #Here we set the forms so we can use them.
+        return context
+
+#Add this
+#Add this
+class ChallengeDetailView(DetailView):
+    model = Challenge
+    template_name = 'challenge_detail.html'
+    context_object_name = 'challenge'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = JoinChallengeForm(initial={'challenge_id': self.object.id}) #Here we set the forms, but with the default values
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse('login'))  # Or wherever your login page is
+
+        challenge = self.get_object()  # Retrieve the Challenge object
+
+        # Check if the user has already joined this challenge
+        existing_progress = UserProgress.objects.filter(user=request.user, challenge=challenge).exists()
+        if not existing_progress:
+            # Create a new UserProgress object
+            UserProgress.objects.create(
+                user=request.user,
+                challenge=challenge,
+                start_date=timezone.now() #Setting start time and not end time.
+            )
+            messages.success(request, "Successfully joined the challenge")
+        else:
+            messages.info(request, "You've already joined this challenge!")
+        return HttpResponseRedirect(reverse('my-challenges'))
 
 class LeaderboardView(LoginRequiredMixin, ListView):
     model = LeaderboardEntry
@@ -121,6 +174,28 @@ def assign_badge_view(request, proof_id):
 
     return render(request, 'assign_badge.html', {'form': form, 'proof': proof})
 
+#Add this
+class JoinChallengeView(LoginRequiredMixin, FormView):
+    form_class = JoinChallengeForm
+    template_name = 'join_challenge.html'  # Create this template
+    success_url = reverse_lazy('my-challenges') #Where you want to go after you joined the challenges.
+
+    def form_valid(self, form):
+        challenge_id = form.cleaned_data['challenge_id']
+        challenge = get_object_or_404(Challenge, id=challenge_id)
+        UserProgress.objects.create(user=self.request.user, challenge=challenge)
+        messages.success(self.request, f"You have joined the {challenge.title} challenge!")
+        return super().form_valid(form)
+
+
+#Add This
+class MyProgressView(LoginRequiredMixin, ListView):
+    model = UserProgress
+    template_name = 'my_challenges.html'
+    context_object_name = 'user_progress'
+
+    def get_queryset(self):
+        return UserProgress.objects.filter(user=self.request.user)
 
 @login_required
 def review_proofs(request):
