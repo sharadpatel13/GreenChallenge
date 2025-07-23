@@ -13,10 +13,12 @@
             {% if challenge.badge %}
             <p><strong>Badge:</strong> {{ challenge.badge.name }}</p>
             {% endif %}
-            <form method="post">
+
+            <form method="post" action="{% url 'join_challenge' challenge.id %}">  <!-- ADD THIS FORM -->
                 {% csrf_token %}
-                <button type="submit" class="btn btn-success">Join challenge</button>
+                <button type="submit" class="btn btn-success">Join Challenge</button>
             </form>
+
         </div>
         <div class="card-footer">
             <a href="{% url 'challenge_list' %}" class="btn btn-secondary">Back to List</a>

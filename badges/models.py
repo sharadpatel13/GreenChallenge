@@ -21,13 +21,20 @@ class Badge(models.Model):
     def __str__(self):
         return self.name
 class UserProgress(models.Model):
+    STATUS_CHOICES = [
+        ('in_progress', 'In Progress'),
+        ('pending_review', 'Pending Review'),
+        ('completed', 'Completed'),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE) # change the "challenge" instead of challenge_title
-    start_date = models.DateTimeField(default=timezone.now)
-    completed = models.BooleanField(default=False)
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_progress')
+    joined_at = models.DateTimeField(default=timezone.now)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    #proof_upload = models.FileField(upload_to='proof_uploads/', null=True, blank=True) # We handle proof in UserProofUpload
 
     def __str__(self):
-        return f"{self.user.username} - {self.challenge.title}"
+        return f"{self.user.username} - {self.challenge.title} - {self.status}"
 
 class UserProofUpload(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

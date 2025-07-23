@@ -1,9 +1,18 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block content %}
 <div class="container mt-5">
     <h2 class="mb-4">🌿 My Challenges</h2>
     <p>Welcome, {{ user.username }}! 🎉</p>
+
+    <!-- Display Messages -->
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
     <!-- Summary Cards -->
     <div class="row text-center mb-4">
@@ -32,6 +41,20 @@
             </div>
         </div>
     </div>
+
+    <!-- List of Challenges -->
+    <h3 class="mt-4">Challenges You've Joined</h3>
+    {% if user_progress %}
+        <ul class="list-group">
+            {% for progress in user_progress %}
+            <li class="list-group-item">
+                    {{ progress.challenge.title }}
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't joined any challenges yet.</p>
+    {% endif %}
 
     <!-- Approved Submissions -->
     {% if grouped_proofs %}
