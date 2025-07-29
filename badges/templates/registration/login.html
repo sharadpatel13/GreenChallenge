@@ -3,10 +3,13 @@
 {% block content %}
 <div class="container mt-4">
   <h2>🔐 Login</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button class="btn btn-primary" type="submit">Login</button>
-  </form>
+  <form method="post" action="{% url 'login' %}">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  {{ form.username }} {{ form.password }}
+  <input type="hidden" name="next" value="{{ next }}">
+  <button type="submit">Log In</button>
+</form>
+
 </div>
 {% endblock %}

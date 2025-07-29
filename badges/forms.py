@@ -1,6 +1,7 @@
 from django import forms
 from .models import UserProofUpload
 from .models import Challenge, Badge, UserProgress
+from django.contrib.auth.forms import AuthenticationForm
 
 class SubmitProofForm(forms.ModelForm):
     class Meta:
@@ -34,3 +35,7 @@ class ChallengeForm(forms.ModelForm):
 
 class JoinChallengeForm(forms.Form):
     challenge_id = forms.IntegerField(widget=forms.HiddenInput())
+
+class CustomLoginForm(AuthenticationForm):
+    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))

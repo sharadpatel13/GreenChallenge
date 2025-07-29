@@ -129,3 +129,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# When @login_required redirects, it’ll send to ‘login’ URL name
+LOGIN_URL = 'login'
+
+# After login, if no ?next=, this is the fallback
+LOGIN_REDIRECT_URL = 'challenge_list'

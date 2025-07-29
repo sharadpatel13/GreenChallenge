@@ -11,8 +11,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from .models import Challenge, UserProgress  # Corrected import
 from .models import UserProofUpload, Badge, LeaderboardEntry, Challenge, UserProgress
-from .forms import SubmitProofForm, BadgeAssignForm, ChallengeForm, JoinChallengeForm
+from .forms import SubmitProofForm, BadgeAssignForm, ChallengeForm, JoinChallengeForm, CustomLoginForm
 from collections import defaultdict
+from django.contrib.auth.views import LoginView as DjangoLoginView, LogoutView as DjangoLogoutView, PasswordResetView as DjangoPasswordResetView
 
 # Challenge Views
 class ChallengeCreateView(LoginRequiredMixin, CreateView):
@@ -184,3 +185,25 @@ class JoinChallengeView(LoginRequiredMixin, View):
                 messages.success(request, f"You have joined the {challenge.title} challenge!") # Include the challenge title
 
         return redirect('my-challenges') #or my_progress depending on where you want to go.
+
+class LoginView(DjangoLoginView):
+    form_class = CustomLoginForm
+    template_name = 'registration/login.html'
+
+    # If someone already logged in hits '/', send them straight to dashboard
+    redirect_authenticated_user = True
+
+    # After a fresh login, send them to /dashboard/
+    def get_success_url(self):
+        return reverse_lazy('challenge_list')
+
+class LogoutView(DjangoLogoutView):
+    # where to send users after logout
+    next_page = reverse_lazy('login')
+
+
+class ForgotPasswordView(DjangoPasswordResetView):
+    template_name = 'registration/forgot_password.html'
+    email_template_name = 'registration/password_reset_email.html'
+    success_url = reverse_lazy('login')
+    # optionally override form_class if you have a CustomPasswordResetForm

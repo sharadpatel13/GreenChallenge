@@ -8,6 +8,9 @@ from .views import (
     SubmitProofView,
     assign_badge_view,
     JoinChallengeView,
+    LoginView, 
+    LogoutView,
+    ForgotPasswordView,
 )
 
 urlpatterns = [
@@ -18,5 +21,8 @@ urlpatterns = [
     path('my-challenges/', MyChallengesView.as_view(), name='my-challenges'),
     path('submit-proof/', SubmitProofView.as_view(), name='submit-proof'),
     path('assign-badge/<int:proof_id>/', assign_badge_view, name='assign-badge'),
-    path('challenges/<int:challenge_id>/join/', JoinChallengeView.as_view(), name='join_challenge'), 
+    path('challenges/<int:challenge_id>/join/', JoinChallengeView.as_view(), name='join_challenge'),
+    path('', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
+    path('password-reset/', ForgotPasswordView.as_view(), name='password_reset'),
 ]
