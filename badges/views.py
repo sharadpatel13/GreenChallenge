@@ -186,6 +186,26 @@ class JoinChallengeView(LoginRequiredMixin, View):
 
         return redirect('my-challenges') #or my_progress depending on where you want to go.
 
+class ReviewProofsView(LoginRequiredMixin, View):
+    def get(self, request):
+        proofs = UserProofUpload.objects.filter(approved=False, rejected=False)
+        return render(request, 'review_proofs.html', {'proofs': proofs})
+
+    def post(self, request):
+        proof_id = request.POST.get('proof_id')
+        action = request.POST.get('action')
+        proof = get_object_or_404(UserProofUpload, id=proof_id)
+
+        if action == 'approve':
+            proof.approved = True
+            messages.success(request, f"✅ Approved proof for {proof.challenge_title}")
+        elif action == 'reject':
+            proof.rejected = True
+            messages.warning(request, f"❌ Rejected proof for {proof.challenge_title}")
+
+        proof.save()
+        return redirect('review_proofs')
+
 class LoginView(DjangoLoginView):
     form_class = CustomLoginForm
     template_name = 'registration/login.html'
