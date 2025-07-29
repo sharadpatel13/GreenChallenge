@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">  <!-- Link to static CSS file if you have one -->
 </head>
 <body>
+    {% block navbar %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">EcoChallenge</a>
@@ -53,6 +54,7 @@
             </div>
         </div>
     </nav>
+    {% endblock %}
 
     <div class="container mt-4">
         {% block content %}

@@ -11,10 +11,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from .models import Challenge, UserProgress  # Corrected import
 from .models import UserProofUpload, Badge, LeaderboardEntry, Challenge, UserProgress
-from .forms import SubmitProofForm, BadgeAssignForm, ChallengeForm, JoinChallengeForm, CustomLoginForm
+from .forms import SubmitProofForm, BadgeAssignForm, ChallengeForm, JoinChallengeForm, CustomLoginForm, CustomPasswordResetForm, CustomSignUpForm, CustomSetPasswordForm
 from collections import defaultdict
-from django.contrib.auth.views import LoginView as DjangoLoginView, LogoutView as DjangoLogoutView, PasswordResetView as DjangoPasswordResetView
-
+from django.contrib.auth.views import LoginView as DjangoLoginView, LogoutView as DjangoLogoutView, PasswordResetView as DjangoPasswordResetView, PasswordResetDoneView as DjangoPasswordResetDoneView, PasswordResetConfirmView as DjangoPasswordResetConfirmView, PasswordResetCompleteView as DjangoPasswordResetCompleteView
+from django.contrib.auth.forms import UserCreationForm
 # Challenge Views
 class ChallengeCreateView(LoginRequiredMixin, CreateView):
     model = Challenge
@@ -22,7 +22,7 @@ class ChallengeCreateView(LoginRequiredMixin, CreateView):
     template_name = 'challenge_form.html' # Modified
     success_url = reverse_lazy('challenge_list')
 
-class ChallengeListView(ListView):
+class ChallengeListView(LoginRequiredMixin,ListView):
     model = Challenge
     template_name = 'challenge_list.html' # Modified
     context_object_name = 'challenges'
@@ -33,7 +33,7 @@ class ChallengeListView(ListView):
         context['form'] = JoinChallengeForm()
         return context
 
-class ChallengeDetailView(DetailView):
+class ChallengeDetailView(LoginRequiredMixin,DetailView):
     model = Challenge
     template_name = 'challenge_detail.html' # Modified
     context_object_name = 'challenge'
@@ -223,7 +223,23 @@ class LogoutView(DjangoLogoutView):
 
 
 class ForgotPasswordView(DjangoPasswordResetView):
-    template_name = 'registration/forgot_password.html'
+    form_class = CustomPasswordResetForm
+    template_name = 'registration/password_reset_form.html'
     email_template_name = 'registration/password_reset_email.html'
+    success_url = reverse_lazy('password_reset_done')
+
+class ForgotPasswordDoneView(DjangoPasswordResetDoneView):
+    template_name = 'registration/password_reset_done.html'
+
+class ForgotPasswordConfirmView(DjangoPasswordResetConfirmView):
+    form_class    = CustomSetPasswordForm
+    template_name = 'registration/password_reset_confirm.html'
+    success_url   = reverse_lazy('password_reset_complete')
+
+class ForgotPasswordCompleteView(DjangoPasswordResetCompleteView):
+    template_name = 'registration/password_reset_complete.html'
+
+class SignUpView(CreateView):
+    form_class = CustomSignUpForm
+    template_name = 'registration/signup.html'
     success_url = reverse_lazy('login')
-    # optionally override form_class if you have a CustomPasswordResetForm

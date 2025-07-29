@@ -135,3 +135,6 @@ LOGIN_URL = 'login'
 
 # After login, if no ?next=, this is the fallback
 LOGIN_REDIRECT_URL = 'challenge_list'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'neelthomas18ca@gmail.com'
