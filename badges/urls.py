@@ -8,6 +8,7 @@ from .views import (
     SubmitProofView,
     assign_badge_view,
     JoinChallengeView,
+    ReviewProofsView
 )
 
 urlpatterns = [
@@ -18,5 +19,6 @@ urlpatterns = [
     path('my-challenges/', MyChallengesView.as_view(), name='my-challenges'),
     path('submit-proof/', SubmitProofView.as_view(), name='submit-proof'),
     path('assign-badge/<int:proof_id>/', assign_badge_view, name='assign-badge'),
+    path('review-proofs/', ReviewProofsView.as_view(), name='review_proofs'),
     path('challenges/<int:challenge_id>/join/', JoinChallengeView.as_view(), name='join_challenge'), 
 ]
