@@ -16,6 +16,7 @@ from .views import (
     ForgotPasswordConfirmView,
     ForgotPasswordCompleteView,
     SignUpView,
+    AboutView
 )
 
 urlpatterns = [
@@ -35,4 +36,7 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/',ForgotPasswordConfirmView.as_view(),name='password_reset_confirm'),
     path('reset/done/',ForgotPasswordCompleteView.as_view(),name='password_reset_complete'),
     path('signup/', SignUpView.as_view(), name='signup'),
+    path('about/', AboutView.as_view(), name='about'),
+
+
 ]
