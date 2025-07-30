@@ -56,56 +56,40 @@
         <p>You haven't joined any challenges yet.</p>
     {% endif %}
 
-    <!-- Approved Submissions -->
-    {% if grouped_proofs %}
-        <h3 class="mt-4">📄 Approved Submissions</h3>
-        {% for challenge_title, proofs in grouped_proofs.items %}
-            <div class="card my-3 shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <strong>{{ challenge_title }}</strong>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        {% for proof in proofs %}
-                            <li class="list-group-item">
-                                📅 Uploaded: {{ proof.date_uploaded|date:"M d, Y" }}<br>
-                                🏅 Badge:
-                                {% if proof.badge_awarded %}
-                                    <strong>{{ proof.badge_awarded.name }}</strong>
-                                {% else %}
-                                    None
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
+        <h3 class="mt-4 text-success">✅ Approved Submissions</h3>
+    {% if approved_proofs %}
+      <ul class="list-group mt-2">
+        {% for proof in approved_proofs %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong>{{ proof.challenge.title }}</strong><br>
+              📅 Uploaded: {{ proof.date_uploaded|date:"M d, Y" }}<br>
+              ✅ <strong>Status: Approved</strong>
             </div>
+            <a href="{{ proof.proof_file.url }}" class="btn btn-outline-success btn-sm" target="_blank">View Proof</a>
+          </li>
         {% endfor %}
+      </ul>
     {% else %}
-    <p class="text-muted"><strong>You don’t have any approved submissions yet.</strong></p>
+      <p class="text-muted">No approved submissions yet.</p>
     {% endif %}
 
-    <!-- Pending Submissions -->
-    {% if pending_proofs_grouped %}
-        <h3 class="mt-5">⌛ Pending Submissions</h3>
-        {% for challenge_title, proofs in pending_proofs_grouped.items %}
-            <div class="card my-3 shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <strong>{{ challenge_title }}</strong>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        {% for proof in proofs %}
-                            <li class="list-group-item">
-                                📅 Uploaded: {{ proof.date_uploaded|date:"M d, Y" }}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
+        {% if pending_proofs %}
+      <h3 class="mt-5 text-warning">⏳ Pending Submissions</h3>
+      <ul class="list-group mt-2">
+        {% for proof in pending_proofs %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong>{{ proof.challenge.title }}</strong><br>
+              📅 Uploaded: {{ proof.date_uploaded|date:"M d, Y" }}<br>
+              ⏳ <strong>Status: Pending</strong>
             </div>
+            <a href="{{ proof.proof_file.url }}" class="btn btn-outline-secondary btn-sm" target="_blank">View Proof</a>
+          </li>
         {% endfor %}
+      </ul>
     {% else %}
-    <p class="text-muted mt-3"><strong>No pending submissions.</strong></p>
+      <p class="text-muted mt-3"><strong>No pending submissions.</strong></p>
     {% endif %}
 
     <!-- Rejected Submissions -->
