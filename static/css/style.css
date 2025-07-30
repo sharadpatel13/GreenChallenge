@@ -1,0 +1,65 @@
+.custom-footer {
+  background: linear-gradient(to right, #2e7d32, #66bb6a);
+  color: #fff;
+  padding: 40px 20px 20px;
+  font-family: 'Segoe UI', sans-serif;
+  margin-top: 60px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+}
+
+.footer-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.footer-left {
+  max-width: 300px;
+}
+
+.footer-logo {
+  height: 60px;
+  margin-bottom: 10px;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-links a {
+  color: #e8f5e9;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer-links a:hover {
+  color: #c8e6c9;
+  text-decoration: underline;
+}
+
+.footer-bottom {
+  width: 100%;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #e0f2f1;
+}
+/* Force white text in navbar */
+.navbar a,
+.navbar .navbar-brand,
+.navbar .nav-link,
+.navbar span.nav-link {
+  color: white !important;
+}
+
+/* Optional: make hover lighter */
+.navbar .nav-link:hover,
+.navbar .navbar-brand:hover {
+  color: #d1fae5 !important;
+}
+
