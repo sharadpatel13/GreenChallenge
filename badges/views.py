@@ -15,6 +15,7 @@ from .forms import SubmitProofForm, BadgeAssignForm, ChallengeForm, JoinChalleng
 from collections import defaultdict
 from django.contrib.auth.views import LoginView as DjangoLoginView, LogoutView as DjangoLogoutView, PasswordResetView as DjangoPasswordResetView, PasswordResetDoneView as DjangoPasswordResetDoneView, PasswordResetConfirmView as DjangoPasswordResetConfirmView, PasswordResetCompleteView as DjangoPasswordResetCompleteView
 from django.contrib.auth.forms import UserCreationForm
+from django.db.models import Q
 # Challenge Views
 class ChallengeCreateView(LoginRequiredMixin, CreateView):
     model = Challenge
@@ -22,16 +23,36 @@ class ChallengeCreateView(LoginRequiredMixin, CreateView):
     template_name = 'challenge_form.html' # Modified
     success_url = reverse_lazy('challenge_list')
 
-class ChallengeListView(LoginRequiredMixin,ListView):
+class ChallengeListView(LoginRequiredMixin, ListView):
     model = Challenge
-    template_name = 'challenge_list.html' # Modified
+    template_name = 'challenge_list.html'
     context_object_name = 'challenges'
     ordering = ['-created_at']
+    login_url = 'login'
+    redirect_field_name = 'next'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            # Search in both title AND description
+            qs = qs.filter(
+                Q(title__icontains=q) |
+                Q(description__icontains=q)
+            ).distinct()
+        return qs
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['form'] = JoinChallengeForm()
-        return context
+        ctx = super().get_context_data(**kwargs)
+        ctx['form'] = JoinChallengeForm()
+        ctx['q'] = self.request.GET.get('q', '')
+        # Provide all titles for the datalist suggestions
+        ctx['all_titles'] = (
+            Challenge.objects
+                     .order_by('title')
+                     .values_list('title', flat=True)
+        )
+        return ctx
 
 class ChallengeDetailView(LoginRequiredMixin,DetailView):
     model = Challenge

@@ -2,13 +2,38 @@
 
 {% block content %}
 <div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Challenges</h2>
-        <a href="{% url 'create_challenge' %}" class="btn btn-success">Create New Challenge</a>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Challenges</h2>
+    <a href="{% url 'create_challenge' %}" class="btn btn-success">Create New Challenge</a>
+  </div>
+
+  <!-- Enhanced Search with Suggestions -->
+  <form method="get" class="mb-4">
+    <div class="input-group">
+      <input
+        type="text"
+        name="q"
+        class="form-control"
+        placeholder="Search by title or description…"
+        aria-label="Search challenges"
+        value="{{ q }}"
+        list="challenge-titles"
+      >
+      <datalist id="challenge-titles">
+        {% for title in all_titles %}
+          <option value="{{ title }}"></option>
+        {% endfor %}
+      </datalist>
+      <button class="btn btn-outline-secondary" type="submit">
+        Search
+      </button>
     </div>
-    {% if challenges %}
+  </form>
+
+  {% if challenges %}
     <div class="row">
-        {% for challenge in challenges %}
+      {% for challenge in challenges %}
         <div class="col-md-4 mb-4">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
@@ -17,15 +42,14 @@
                 </div>
                 <div class="card-footer d-flex justify-content-between align-items-center">
                     <small class="text-muted">Points: {{ challenge.difficulty_points }}</small>
-                    <a href="{% url 'challenge_detail' challenge.pk %}" class="btn btn-sm btn-success">View Details</a>
-
+                    <a href="{% url 'challenge_detail' challenge.pk %}" class="btn btn-sm btn-outline-primary">View Details</a>
                 </div>
             </div>
         </div>
-        {% endfor %}
+      {% endfor %}
     </div>
-    {% else %}
-    <p>No challenges available yet.</p>
-    {% endif %}
+  {% else %}
+    <p>No challenges match your search.</p>
+  {% endif %}
 </div>
 {% endblock %}
