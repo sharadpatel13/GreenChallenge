@@ -1,6 +1,8 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import UserProofUpload, LeaderboardEntry, Badge
+from .models import UserProofUpload, LeaderboardEntry, Badge, UserActivity
+from django.contrib.auth.signals import user_logged_in
+from django.utils import timezone
 
 @receiver(post_save, sender=UserProofUpload)
 def award_badge_on_approval(sender, instance, created, **kwargs):
@@ -19,4 +21,13 @@ def award_badge_on_approval(sender, instance, created, **kwargs):
 
         # Save with update_fields to minimize triggers
         instance.save(update_fields=['badge_awarded'])
+
+@receiver(user_logged_in)
+def increment_login_count(sender, request, user, **kwargs):
+    activity, _ = UserActivity.objects.get_or_create(user=user)
+    activity.login_count += 1
+    activity.last_login = timezone.now()
+    activity.save()
+    # Optional: store in session for quick template access
+    request.session['login_count'] = activity.login_count
 

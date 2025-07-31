@@ -13,6 +13,14 @@ class Challenge(models.Model):
     def __str__(self):
         return self.title
 
+class UserActivity(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    login_count = models.PositiveIntegerField(default=0)
+    last_login = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username}: {self.login_count} logins"
+
 class Badge(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
