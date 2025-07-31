@@ -23,6 +23,19 @@ html, body {
   text-align: center;
 }
 
+footer a:hover {
+  text-decoration: underline;
+}
+
+footer i {
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+footer i:hover {
+  color: #28a745;
+}
+
 .footer-bottom {
   font-size: 14px;
   color: #e0f2f1;
